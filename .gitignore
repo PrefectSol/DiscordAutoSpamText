@@ -38,3 +38,6 @@ msbuild.wrn
 
 # JS stuff
 node_modules
+
+# Nuget package
+*.json

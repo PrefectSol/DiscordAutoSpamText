@@ -1,52 +1,60 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-
-namespace DiscordAutoSpam
+﻿namespace DiscordAutoSpam
 {
-    class Program : ModuleBase
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Threading.Tasks;
+    using Discord.Commands;
+    using DiscordAutoSpam.Common;
+
+    public class Program : ModuleBase<SocketCommandContext>
     {
         [Command("Спам")]
+        [Alias("sp")]
         public async Task Spam(int countSpamMessage = 0)
         {
+            Stopwatch sw = new ();
+            Random randomString = new ();
+
             if (countSpamMessage != 0)
             {
-                Console.WriteLine("Запуск спама...");
+                sw.Start();
 
-                string fileName = "~/SpamText.txt"; // link to the spam file
-                Random myRandom = new Random();
-                string[] myString;
+                string path = "/DiscordAutoSpam/SpamText.txt"; // link to the spam file
+                string[] spamString;
 
-                myString = File.ReadAllLines(fileName);
+                spamString = File.ReadAllLines(path);
 
                 for (int i = 0; i < countSpamMessage; i++)
                 {
-                    int index = myRandom.Next(0, myString.Length);
-                    var builder = new EmbedBuilder()
-                        .WithColor(new Color(215, 85, 39))
-                        .WithDescription(myString[index]);
-                    var embed = builder.Build();
-                    await Context.Channel.SendMessageAsync(null, false, embed);
+                    int index = randomString.Next(0, spamString.Length);
+                    var embed = new BotEmbedBuilder()
+                        .WithDescription(spamString[index])
+                        .Build();
+                    await this.ReplyAsync(embed: embed);
                 }
-                var builder2 = new EmbedBuilder()
-                    .WithColor(new Color(215, 85, 39))
-                    .WithDescription($"Было написано спам-сообщений: {countSpamMessage}");
-                Console.WriteLine($"Было написано спам-сообщений: {countSpamMessage}");
-                var embed2 = builder2.Build();
-                var message = await Context.Channel.SendMessageAsync(null, false, embed2);
+
+                var reportEmbed = new BotEmbedBuilder()
+                    .WithDescription($"Было написано спам-сообщений: {countSpamMessage}")
+                    .Build();
+                var message = await this.ReplyAsync(embed: reportEmbed);
 
                 await Task.Delay(2500);
                 await message.DeleteAsync();
+
+                sw.Stop();
+
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.Write("Rprt: ");
+                Console.ResetColor();
+                Console.WriteLine($"{countSpamMessage} spam messages were written in {sw.ElapsedMilliseconds} ms");
             }
             else
             {
-                var builder = new EmbedBuilder()
-                    .WithColor(new Color(215, 85, 39))
-                    .WithDescription("Некорректный ввод. Повторите попытку и введите необходимое количество спам-сообщений");
-                var embed = builder.Build();
-                await Context.Channel.SendMessageAsync(null, false, embed);
+                var embed = new BotEmbedBuilder()
+                    .WithDescription("Некорректный ввод. Повторите попытку и введите необходимое количество спам-сообщений.")
+                    .Build();
+                await this.ReplyAsync(embed: embed);
             }
         }
     }
