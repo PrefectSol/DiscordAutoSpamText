@@ -44,10 +44,7 @@
 
                 sw.Stop();
 
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write("Rprt: ");
-                Console.ResetColor();
-                Console.WriteLine($"{countSpamMessage} spam messages were written in {sw.ElapsedMilliseconds} ms");
+                ConsoleReport.Report($"{countSpamMessage} spam messages were written in {sw.ElapsedMilliseconds} ms");
             }
             else
             {
